@@ -1,3 +1,4 @@
+import codecs
 import importlib
 import os
 
@@ -48,7 +49,7 @@ class Fetcher(object):
         # Delegate off to the configured fetcher.
         content = self._fetcher.fetch(url)
 
-        the_file = open(file_path, 'w')
+        the_file = codecs.open(file_path, 'w', encoding='utf-8')
         the_file.write(content)
         # BAD PROGRAMMER, NO CLOSE, NO COOKIE
 
