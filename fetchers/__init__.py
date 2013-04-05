@@ -1,11 +1,13 @@
+from __future__ import unicode_literals
 import codecs
 import importlib
 import os
+from six import with_metaclass
 
 
 class FetcherMetaclass(type):
     def __new__(cls, name, bases, attrs):
-        use_path = attrs.pop('use', '')
+        use_path = attrs.pop(u'use', u'')
         new_klass = super(FetcherMetaclass, cls).__new__(cls, name, bases, attrs)
 
         if use_path:
@@ -23,11 +25,10 @@ class FetcherMetaclass(type):
         return new_klass
 
 
-class Fetcher(object):
-    __metaclass__ = FetcherMetaclass
+class Fetcher(with_metaclass(FetcherMetaclass)):
     # The default.
-    use = 'fetchers.stdlib.OldBroke'
-    base_path = os.path.join('/tmp', 'feeds')
+    use = u'fetchers.stdlib.OldBroke'
+    base_path = os.path.join(u'/tmp', u'feeds')
 
     def __init__(self):
         super(Fetcher, self).__init__()
@@ -43,14 +44,14 @@ class Fetcher(object):
         if not self._is_setup:
             self.setup()
 
-        base_filename = title.lower().replace(' ', '-') + '.xml'
+        base_filename = title.lower().replace(u' ', u'-') + u'.xml'
         file_path = os.path.join(self.base_path, base_filename)
 
         # Delegate off to the configured fetcher.
         content = self._fetcher.fetch(url)
 
-        the_file = codecs.open(file_path, 'w', encoding='utf-8')
-        the_file.write(content)
-        # BAD PROGRAMMER, NO CLOSE, NO COOKIE
+        # Hooray context managers!
+        with codecs.open(file_path, u'w', encoding=u'utf-8') as the_file:
+            the_file.write(content)
 
         return file_path
