@@ -7,15 +7,18 @@ class FetcherMetaclass(type):
         use_path = attrs.pop('use', '')
         new_klass = super(FetcherMetaclass, cls).__new__(cls, name, bases, attrs)
 
-        # Dynamically load the configured fetcher.
-        # Because metaclasses.
-        path_bits = use_path.split('.')
-        module_path = '.'.join(path_bits[:-1])
-        fetch_klass_name = path_bits[-1]
-        fetch_module = importlib.import_module(module_path)
-        fetch_klass = getattr(fetch_module, fetch_klass_name)
+        if use_path:
+            # Dynamically load the configured fetcher.
+            # Because metaclasses.
+            path_bits = use_path.split('.')
+            module_path = '.'.join(path_bits[:-1])
+            fetch_klass_name = path_bits[-1]
+            fetch_module = importlib.import_module(module_path)
+            fetch_klass = getattr(fetch_module, fetch_klass_name)
+            new_klass._fetcher = fetch_klass()
+        else:
+            new_klass._fetcher = None
 
-        new_klass._fetcher = fetch_klass()
         return new_klass
 
 
